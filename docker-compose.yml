@@ -1,69 +1,73 @@
 version: '3.8'
 
 services:
-  # Banco de dados PostgreSQL
   postgres:
+    container_name: cooperspostgres
     image: postgres:15-alpine
-    container_name: coopers-postgres
     environment:
       POSTGRES_DB: coopers_db
       POSTGRES_USER: coopers_user
       POSTGRES_PASSWORD: coopers_password
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - coopers-network
+      - coopersnetwork
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U coopers_user -d coopers_db"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
 
-  # Backend NestJS
   backend:
+    container_name: coopersbackend
     build:
       context: ./coopers-test-back-end
       dockerfile: Dockerfile
-    container_name: coopers-backend
     environment:
       NODE_ENV: production
-      TYPEORM_HOST: postgres
+      TYPEORM_CONNECTION: postgres
+      TYPEORM_HOST: cooperspostgres
       TYPEORM_PORT: 5432
       TYPEORM_USERNAME: coopers_user
       TYPEORM_PASSWORD: coopers_password
       TYPEORM_DATABASE: coopers_db
-      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_SECRET: d19f823533b6848c70fd7733bbded54af5c93a4c5f13a6f14438b61f9f311237e2998ae7d270dd6bc6c5abc9d1b6a11c3d0baf0078e6a98731c25eeafbed6bc1
+      JWT_REFRESH_SECRET: d19f823533b6848c70fd7733bbded54af5c93a4c5f13a6f14438b61f9f311237e2998ae7d270dd6bc6c5abc9d1b6a11c3d0baf0078e6a98731c25eeafbed62323
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
     ports:
       - "3001:3001"
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - coopers-network
-    restart: unless-stopped
+      - coopersnetwork
 
-  # Frontend Next.js
   frontend:
+    container_name: coopersfrontend
     build:
       context: ./coopers-test-front-end
       dockerfile: Dockerfile
-    container_name: coopers-frontend
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXTAUTH_SECRET: d19f823533b6848c70fd7733bbded54af5c93a4c5f13a6f14438b61f9f311237e2998ae7d270dd6bc6c5abc9d1b6a11c3d0baf0078e6a98731c25eeafbed6bc1
+      NEXTAUTH_URL: http://localhost:3000
     ports:
       - "3000:3000"
     depends_on:
       - backend
     networks:
-      - coopers-network
-    restart: unless-stopped
+      - coopersnetwork
 
 volumes:
-  postgres_data:
+  postgres_data: 
 
 networks:
-  coopers-network:
+  coopersnetwork:
+    name: coopersnetwork
     driver: bridge 
+
+
