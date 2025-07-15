@@ -23,7 +23,7 @@ services:
   backend:
     container_name: coopersbackend
     build:
-      context: ./coopers-test-back-end
+      context: ./back-end
       dockerfile: Dockerfile
     environment:
       NODE_ENV: production
@@ -48,7 +48,7 @@ services:
   frontend:
     container_name: coopersfrontend
     build:
-      context: ./coopers-test-front-end
+      context: ./front-end
       dockerfile: Dockerfile
     environment:
       NODE_ENV: production
