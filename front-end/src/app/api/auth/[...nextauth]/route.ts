@@ -20,9 +20,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
   try {
     console.log("🔄 Tentando renovar token...");
     const response = await axios.post(
-      `${
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
-      }/auth/refresh`,
+      `http://coopersbackend:3001/auth/refresh`,
       {
         refresh_token: token.refreshToken,
       }
@@ -52,34 +50,46 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         try {
+          console.log("🔧 NextAuth - Iniciando authorize...");
           console.log(
             "🔧 NextAuth - Fazendo login para:",
-            `${process.env.NEXT_PUBLIC_API_URL}/auth/login`
+            `${"http://coopersbackend:3001"}/auth/login`
           );
           console.log("🔧 NextAuth - Credenciais:", {
             email: credentials?.email,
+            password: credentials?.password,
           });
 
-          const res = await axios.post(
-            `${
-              process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
-            }/auth/login`,
+          console.log("🔧 NextAuth - Fazendo requisição axios...");
+          const response = await axios.post(
+            `http://coopersbackend:3001/auth/login`,
             {
               email: credentials?.email,
               password: credentials?.password,
+            },
+            {
+              timeout: 10000,
+              headers: {
+                "Content-Type": "application/json",
+              },
             }
           );
 
-          console.log("🔧 NextAuth - Resposta do backend:", res.data);
+          console.log("🔧 NextAuth - Resposta recebida com sucesso!");
+          console.log("🔧 NextAuth - Resposta do backend:", response.data);
 
-          if (res.data && res.data.user && res.data.access_token) {
+          if (
+            response.data &&
+            response.data.user &&
+            response.data.access_token
+          ) {
             console.log("✅ NextAuth - Login bem-sucedido, retornando usuário");
             return {
-              ...res.data.user,
-              accessToken: res.data.access_token,
-              refreshToken: res.data.refresh_token,
+              ...response.data.user,
+              accessToken: response.data.access_token,
+              refreshToken: response.data.refresh_token,
               accessTokenExpires:
-                Date.now() + (res.data.expires_in || 60 * 60) * 1000, // Usar expires_in do backend
+                Date.now() + (response.data.expires_in || 60 * 60) * 1000, // Usar expires_in do backend
             };
           }
 

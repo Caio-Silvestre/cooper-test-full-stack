@@ -26,7 +26,7 @@ services:
       context: ./back-end
       dockerfile: Dockerfile
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       TYPEORM_CONNECTION: postgres
       TYPEORM_HOST: cooperspostgres
       TYPEORM_PORT: 5432
@@ -34,7 +34,7 @@ services:
       TYPEORM_PASSWORD: coopers_password
       TYPEORM_DATABASE: coopers_db
       JWT_SECRET: d19f823533b6848c70fd7733bbded54af5c93a4c5f13a6f14438b61f9f311237e2998ae7d270dd6bc6c5abc9d1b6a11c3d0baf0078e6a98731c25eeafbed6bc1
-      JWT_REFRESH_SECRET: d19f823533b6848c70fd7733bbded54af5c93a4c5f13a6f14438b61f9f311237e2998ae7d270dd6bc6c5abc9d1b6a11c3d0baf0078e6a98731c25eeafbed62323
+      JWT_REFRESH_SECRET: 29a44aadaf19d8a82110a00668b20097bd5a397cf5ed206a662d6ff3c9d08c7e7dcada1c44bd14b54ed945827eb068e825955a5caad981a20938eae99ce87e86
       JWT_EXPIRES_IN: 15m
       JWT_REFRESH_EXPIRES_IN: 7d
     ports:
@@ -51,12 +51,16 @@ services:
       context: ./front-end
       dockerfile: Dockerfile
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:3001
       NEXTAUTH_SECRET: d19f823533b6848c70fd7733bbded54af5c93a4c5f13a6f14438b61f9f311237e2998ae7d270dd6bc6c5abc9d1b6a11c3d0baf0078e6a98731c25eeafbed6bc1
       NEXTAUTH_URL: http://localhost:3000
     ports:
       - "3000:3000"
+    volumes:
+      - ./front-end:/app
+      - /app/node_modules
+      - /app/.next
     depends_on:
       - backend
     networks:
